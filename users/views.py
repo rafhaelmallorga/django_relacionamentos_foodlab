@@ -2,7 +2,10 @@ from types import ModuleType
 
 from django.core.exceptions import ValidationError
 from django.forms.models import model_to_dict
+from django.shortcuts import get_object_or_404
 from rest_framework.views import APIView, Request, Response, status
+
+from users import serializers
 
 from .models import User
 from .serializers import UserSerializer
@@ -31,3 +34,18 @@ class UserView(APIView):
         serializer = UserSerializer(user)
 
         return Response(serializer.data, status.HTTP_201_CREATED)
+
+
+class UserDetailView(APIView):
+    def get(self, request: Request, user_id: int) -> Response:
+        user = get_object_or_404(User, id=user_id)
+
+        serializer = UserSerializer(user)
+
+        return Response(serializer.data)
+
+    def patch(self, request: Request, user_id: int) -> Response:
+        ...
+
+    def delete(self, request: Request, user_id: int) -> Response:
+        ...
