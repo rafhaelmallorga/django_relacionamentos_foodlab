@@ -5,26 +5,29 @@ from django.forms.models import model_to_dict
 from rest_framework.views import APIView, Request, Response, status
 
 from .models import User
+from .serializers import UserSerializer
 
 
 class UserView(APIView):
     def get(self, request: Request):
         users = User.objects.all()
 
-        users_list = [model_to_dict(user) for user in users]
+        serializer = UserSerializer(users, many=True)
 
-        return Response(users_list)
+        return Response(serializer.data)
 
     def post(self, request: Request):
-        user = User(**request.data)
 
-        try:
-            user.full_clean()
-        except ValidationError as err:
-            return Response(err.message_dict, status.HTTP_400_BAD_REQUEST)
+        serializer = UserSerializer(data=request.data)
 
-        user.save()
+        # if not serializer.is_valid():
+        #     return Response(serializer.errors, status.HTTP_400_BAD_REQUEST)
 
-        user_dict = model_to_dict(user)
+        # Raise exception faz o if a cima.
+        serializer.is_valid(raise_exception=True)
 
-        return Response(user_dict, status.HTTP_201_CREATED)
+        user = User.objects.create(**serializer.validated_data)
+
+        serializer = UserSerializer(user)
+
+        return Response(serializer.data, status.HTTP_201_CREATED)

@@ -17,5 +17,8 @@ class User(models.Model):
         max_length=20, choices=Seasons.choices, default=Seasons.DEFAULT
     )
 
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
     def __repr__(self) -> str:
         return f"<{self.id} - {self.email}>"
