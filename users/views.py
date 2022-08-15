@@ -1,3 +1,4 @@
+from functools import partial
 from types import ModuleType
 
 from django.core.exceptions import ValidationError
@@ -45,7 +46,23 @@ class UserDetailView(APIView):
         return Response(serializer.data)
 
     def patch(self, request: Request, user_id: int) -> Response:
-        ...
+        user = get_object_or_404(User, id=user_id)
+
+        serializer = UserSerializer(data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+
+        for key, value in request.data.items():
+            setattr(user, key, value)
+
+        user.save()
+
+        serializer = UserSerializer(user)
+
+        return Response(serializer.data)
 
     def delete(self, request: Request, user_id: int) -> Response:
-        ...
+        user = get_object_or_404(User, id=user_id)
+
+        user.delete()
+
+        return Response(status=status.HTTP_204_NO_CONTENT)
