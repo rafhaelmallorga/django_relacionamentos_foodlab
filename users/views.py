@@ -9,20 +9,20 @@ from rest_framework.views import APIView, Request, Response, status
 from users import serializers
 
 from .models import User
-from .serializers import UserSerializer
+from .serializers import UserDetailSerializer, UserListSerializer
 
 
 class UserView(APIView):
     def get(self, request: Request):
         users = User.objects.all()
 
-        serializer = UserSerializer(users, many=True)
+        serializer = UserListSerializer(users, many=True)
 
         return Response(serializer.data)
 
     def post(self, request: Request):
 
-        serializer = UserSerializer(data=request.data)
+        serializer = UserDetailSerializer(data=request.data)
 
         # if not serializer.is_valid():
         #     return Response(serializer.errors, status.HTTP_400_BAD_REQUEST)
@@ -30,9 +30,7 @@ class UserView(APIView):
         # Raise exception faz o if a cima.
         serializer.is_valid(raise_exception=True)
 
-        user = User.objects.create(**serializer.validated_data)
-
-        serializer = UserSerializer(user)
+        serializer.save()
 
         return Response(serializer.data, status.HTTP_201_CREATED)
 
@@ -41,22 +39,17 @@ class UserDetailView(APIView):
     def get(self, request: Request, user_id: int) -> Response:
         user = get_object_or_404(User, id=user_id)
 
-        serializer = UserSerializer(user)
+        serializer = UserDetailSerializer(user)
 
         return Response(serializer.data)
 
     def patch(self, request: Request, user_id: int) -> Response:
         user = get_object_or_404(User, id=user_id)
 
-        serializer = UserSerializer(data=request.data, partial=True)
+        serializer = UserDetailSerializer(data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
 
-        for key, value in request.data.items():
-            setattr(user, key, value)
-
-        user.save()
-
-        serializer = UserSerializer(user)
+        serializer.save()
 
         return Response(serializer.data)
 
