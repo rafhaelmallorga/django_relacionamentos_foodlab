@@ -46,7 +46,7 @@ class UserDetailView(APIView):
     def patch(self, request: Request, user_id: int) -> Response:
         user = get_object_or_404(User, id=user_id)
 
-        serializer = UserDetailSerializer(data=request.data, partial=True)
+        serializer = UserDetailSerializer(user, request.data, partial=True)
         serializer.is_valid(raise_exception=True)
 
         serializer.save()
