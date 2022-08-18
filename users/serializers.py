@@ -2,8 +2,13 @@ from addresses.models import Address
 from addresses.serializers import AddressSerializer
 from recipes.serializers import RecipeSerializer
 from rest_framework import serializers
+from rest_framework.exceptions import ValidationError
 
 from .models import Seasons, User
+
+
+class CustomExceptionError(Exception):
+    ...
 
 
 class UserListSerializer(serializers.Serializer):
@@ -51,6 +56,15 @@ class UserDetailSerializer(serializers.Serializer):
 
     def update(self, instance: User, validated_data: dict) -> User:
         for key, value in validated_data.items():
+            if key == "favorite_season":
+                # raise ValidationError(
+                #     {"detail": "Não é possivel atualizar favorite_season."}
+                # )
+
+                raise CustomExceptionError(
+                    {"detail": "Não é possivel atualizar favorite_season."}
+                )
+
             setattr(instance, key, value)
 
         instance.save()

@@ -9,7 +9,7 @@ from rest_framework.views import APIView, Request, Response, status
 from users import serializers
 
 from .models import User
-from .serializers import UserDetailSerializer, UserListSerializer
+from .serializers import CustomExceptionError, UserDetailSerializer, UserListSerializer
 
 
 class UserView(APIView):
@@ -49,7 +49,10 @@ class UserDetailView(APIView):
         serializer = UserDetailSerializer(user, request.data, partial=True)
         serializer.is_valid(raise_exception=True)
 
-        serializer.save()
+        try:
+            serializer.save()
+        except CustomExceptionError as err:
+            return Response(err.args, status.HTTP_400_BAD_REQUEST)
 
         return Response(serializer.data)
 
